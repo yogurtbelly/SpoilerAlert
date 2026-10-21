@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spoiler Alert - Smart Fridge & Arduino Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🥑</div>
+        <div>
+          <h1>Spoiler Alert</h1>
+          <p class="sub">Freshness Tracker & Arduino IoT Controller</p>
+        </div>
+      </div>
+      <button id="toggleSettingsBtn" class="icon-btn" title="GitHub Settings" aria-label="Settings">⚙️</button>
+    </header>
+
+    <!-- Cloud Status Bar -->
+    <div class="cloud-bar">
+      <div class="cloud-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="repoLabel">Connecting to GitHub...</span>
+      </div>
+      <button id="syncBtn" class="btn-sm btn-ghost" title="Sync with GitHub">↻ Sync</button>
+    </div>
+
+    <!-- GitHub Settings Modal/Accordion -->
+    <section id="settingsSection" class="settings-card hidden">
+      <div class="settings-header">
+        <h3>GitHub Cloud Connection</h3>
+        <span class="close-settings" id="closeSettingsBtn">&times;</span>
+      </div>
+      <p class="settings-hint">Data syncs to your repository's <code>items.json</code> file, which your Arduino polls via Wi-Fi.</p>
+      
+      <div class="form-group">
+        <label for="owner">GitHub Username</label>
+        <input id="owner" placeholder="e.g. yogurtbelly" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="repo">Repository Name</label>
+        <input id="repo" placeholder="e.g. SpoilerAlert" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="token">Personal Access Token</label>
+        <div class="input-with-action">
+          <input id="token" type="password" placeholder="ghp_..." autocomplete="off">
+          <button type="button" id="toggleTokenVisibility" class="btn-sm btn-ghost">Show</button>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button id="saveSettings" class="btn-primary">Save Settings</button>
+        <button id="testConnection" class="btn-outline">Test Connection</button>
+      </div>
+    </section>
+
+    <!-- Arduino Hardware Live Status Card -->
+    <section class="card arduino-card">
+      <div class="card-header">
+        <span class="card-title">⚡ Arduino Hardware State</span>
+        <span class="badge" id="arduinoSyncState">Synced</span>
+      </div>
+      <div class="arduino-preview">
+        <div class="led-group">
+          <div class="led-wrapper" id="ledGreenWrap">
+            <div class="led-light led-green" id="ledGreen"></div>
+            <span>Safe</span>
+          </div>
+          <div class="led-wrapper" id="ledYellowWrap">
+            <div class="led-light led-yellow" id="ledYellow"></div>
+            <span>Warning</span>
+          </div>
+          <div class="led-wrapper" id="ledRedWrap">
+            <div class="led-light led-red" id="ledRed"></div>
+            <span>Danger</span>
+          </div>
+        </div>
+        <div class="arduino-info">
+          <div class="arduino-status-text" id="arduinoStatusText">Checking items...</div>
+          <div class="arduino-detail" id="arduinoDetail">NTP Date Synced • Wi-Fi: HyoBiznet</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Item Section -->
+    <section class="card add-card">
+      <div class="card-header">
+        <span class="card-title">➕ Add New Item</span>
+      </div>
+      
+      <div class="add-input-row">
+        <div class="emoji-preview" id="emojiPreview">🥛</div>
+        <input id="name" placeholder="Item name (e.g. Milk, Eggs, Apple)" maxlength="20" autofocus>
+      </div>
+
+      <!-- Quick Shelf Life Presets -->
+      <div class="preset-label">Quick shelf-life presets:</div>
+      <div class="chips-container" id="presetChips">
+        <button type="button" class="chip" data-days="2" data-emoji="🥩">🥩 Meat / Leftovers (+2d)</button>
+        <button type="button" class="chip" data-days="3" data-emoji="🥛">🥛 Dairy (+3d)</button>
+        <button type="button" class="chip" data-days="5" data-emoji="🍞">🍞 Bakery (+5d)</button>
+        <button type="button" class="chip" data-days="7" data-emoji="🥗">🥗 Produce (+7d)</button>
+        <button type="button" class="chip" data-days="14" data-emoji="🥚">🥚 Eggs (+14d)</button>
+        <button type="button" class="chip" data-days="30" data-emoji="🥫">🥫 Pantry (+30d)</button>
+      </div>
+
+      <div class="date-row">
+        <div class="form-group flex-1">
+          <label for="date">Expiry Date</label>
+          <input id="date" type="date">
+        </div>
+        <button id="addBtn" class="btn-primary add-submit-btn">
+          <span class="btn-icon">＋</span> Add Item
+        </button>
+      </div>
+    </section>
+
+    <!-- Items Inventory Section -->
+    <section class="card inventory-card">
+      <div class="inventory-header">
+        <div class="inventory-title-group">
+          <h2>Tracked Items</h2>
+          <span class="item-count-badge" id="totalCount">0</span>
+        </div>
+        <button id="clearExpiredBtn" class="btn-sm btn-danger-ghost hidden">Clear Expired</button>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="filters-row">
+        <input id="searchBar" placeholder="🔍 Search items..." class="search-input">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="urgent">Urgent</button>
+          <button class="filter-tab" data-filter="warn">Soon</button>
+          <button class="filter-tab" data-filter="safe">Fresh</button>
+        </div>
+      </div>
+
+      <!-- List -->
+      <ul id="list" class="item-list"></ul>
+      
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">🥬</div>
+        <p class="empty-title">Your fridge is empty!</p>
+        <p class="empty-sub">Add fresh items above to track expiration dates and send live alerts to your Arduino.</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Spoiler Alert IoT • Connected via GitHub REST API</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
