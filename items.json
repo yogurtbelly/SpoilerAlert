@@ -1,5 +1,9 @@
 [
   {
+    "name": "Yogurt",
+    "expiry": "2026-10-31"
+  },
+  {
     "name": "Milk",
     "expiry": "2026-11-05"
   },
