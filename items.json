@@ -6,5 +6,9 @@
   {
     "name": "Yummy cookie",
     "expiry": "2026-11-07"
+  },
+  {
+    "name": "Eggs",
+    "expiry": "2026-11-16"
   }
 ]
