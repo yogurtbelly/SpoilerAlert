@@ -22,5 +22,9 @@
   {
     "name": "Eggs",
     "expiry": "2026-11-16"
+  },
+  {
+    "name": "Pants",
+    "expiry": "2026-12-02"
   }
 ]
