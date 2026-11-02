@@ -38,5 +38,9 @@
   {
     "name": "Canned tomatoes",
     "expiry": "2026-12-02"
+  },
+  {
+    "name": "Sardines",
+    "expiry": "2026-12-02"
   }
 ]
