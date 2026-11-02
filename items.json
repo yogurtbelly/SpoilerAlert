@@ -1,1 +1,26 @@
-[{"name":"Milk","expiry":"2026-11-04"},{"name":"Yummy cookie","expiry":"2026-11-07"},{"name":"Salad","expiry":"2026-11-09"},{"name":"Eggs","expiry":"2026-11-16"},{"name":"Pants","expiry":"2026-12-02"}]
+[
+  {
+    "name": "Yogurt",
+    "expiry": "2026-10-31"
+  },
+  {
+    "name": "Milk",
+    "expiry": "2026-11-04"
+  },
+  {
+    "name": "Yummy cookie",
+    "expiry": "2026-11-07"
+  },
+  {
+    "name": "Salad",
+    "expiry": "2026-11-09"
+  },
+  {
+    "name": "Eggs",
+    "expiry": "2026-11-16"
+  },
+  {
+    "name": "Pants",
+    "expiry": "2026-12-02"
+  }
+]
