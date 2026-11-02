@@ -1,13 +1,5 @@
 [
   {
-    "name": "Milk",
-    "expiry": "2026-10-25"
-  },
-  {
-    "name": "Salad",
-    "expiry": "2026-10-29"
-  },
-  {
     "name": "Kebab",
     "expiry": "2026-11-06"
   },
