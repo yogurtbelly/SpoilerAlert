@@ -1,1 +1,18 @@
-[{"name":"Tuku Banana Bread","expiry":"2026-11-12"},{"name":"Pants","expiry":"2026-12-02"},{"name":"Canned tomatoes","expiry":"2026-12-02"}]
+[
+  {
+    "name": "New Milk",
+    "expiry": "2026-11-06"
+  },
+  {
+    "name": "Tuku Banana Bread",
+    "expiry": "2026-11-12"
+  },
+  {
+    "name": "Pants",
+    "expiry": "2026-12-02"
+  },
+  {
+    "name": "Canned tomatoes",
+    "expiry": "2026-12-02"
+  }
+]
