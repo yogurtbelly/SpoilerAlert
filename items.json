@@ -18,5 +18,9 @@
   {
     "name": "Eggs",
     "expiry": "2026-11-24"
+  },
+  {
+    "name": "Tomato",
+    "expiry": "2026-12-10"
   }
 ]
