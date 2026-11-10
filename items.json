@@ -6,5 +6,9 @@
   {
     "name": "Milk",
     "expiry": "2026-11-13"
+  },
+  {
+    "name": "Eggs",
+    "expiry": "2026-11-24"
   }
 ]
