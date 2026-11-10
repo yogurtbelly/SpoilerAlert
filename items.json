@@ -2,5 +2,9 @@
   {
     "name": "Meat",
     "expiry": "2026-11-12"
+  },
+  {
+    "name": "Milk",
+    "expiry": "2026-11-13"
   }
 ]
