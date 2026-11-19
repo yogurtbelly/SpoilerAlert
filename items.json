@@ -26,6 +26,11 @@
     "category": "Eggs"
   },
   {
+    "name": "Cheese",
+    "expiry": "2026-12-04",
+    "category": "Dairy"
+  },
+  {
     "name": "Tomato",
     "expiry": "2026-12-20",
     "category": "Pantry"
