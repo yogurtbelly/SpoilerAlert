@@ -23,23 +23,41 @@
       <button id="toggleSettingsBtn" class="icon-btn" title="GitHub Settings" aria-label="Settings">⚙️</button>
     </header>
 
-    <!-- Cloud Status Bar -->
+    <!-- Cloud Status Bar + Account Switcher -->
     <div class="cloud-bar">
       <div class="cloud-status">
         <span class="status-dot" id="statusDot"></span>
         <span id="repoLabel">Connecting to GitHub...</span>
       </div>
-      <button id="syncBtn" class="btn-sm btn-ghost" title="Sync with GitHub">↻ Sync</button>
+      <div class="cloud-actions">
+        <select id="accountSelect" class="account-select" title="Switch Account / Fridge Profile" aria-label="Account Profile"></select>
+        <button id="syncBtn" class="btn-sm btn-ghost" title="Sync with GitHub">↻ Sync</button>
+      </div>
     </div>
 
-    <!-- GitHub Settings Modal/Accordion -->
+    <!-- Main View Switcher (Fridge vs SuperCook Recipes) -->
+    <nav class="view-tabs" aria-label="Main Views">
+      <button type="button" class="view-tab active" data-view="fridge">🧊 My Fridge <span class="tab-pill" id="fridgeTabCount">0</span></button>
+      <button type="button" class="view-tab" data-view="recipes">🍳 SuperCook Recipes</button>
+    </nav>
+
+    <!-- GitHub Settings & Accounts Modal/Accordion -->
     <section id="settingsSection" class="settings-card hidden">
       <div class="settings-header">
-        <h3>GitHub Cloud Connection</h3>
+        <h3>GitHub Cloud & Accounts</h3>
         <span class="close-settings" id="closeSettingsBtn">&times;</span>
       </div>
-      <p class="settings-hint">Data syncs to your repository's <code>items.json</code> file, which your Arduino polls via Wi-Fi.</p>
+      <p class="settings-hint">Data syncs to your repository's <code>items.json</code> (or <code>profiles/&lt;name&gt;.json</code> for extra accounts), which your Arduino polls via Wi-Fi.</p>
       
+      <div class="account-manager">
+        <label for="newAccountName">Add Account / Fridge Profile</label>
+        <div class="account-add-row">
+          <input id="newAccountName" placeholder="e.g. Dorm, Mom, Guest" maxlength="20" autocomplete="off">
+          <button type="button" id="addAccountBtn" class="btn-outline btn-sm-pad">＋ Add</button>
+          <button type="button" id="deleteAccountBtn" class="btn-sm btn-danger-ghost hidden">Delete</button>
+        </div>
+      </div>
+
       <div class="form-group">
         <label for="owner">GitHub Username</label>
         <input id="owner" placeholder="e.g. yogurtbelly" autocomplete="off">
@@ -60,6 +78,8 @@
         <button id="testConnection" class="btn-outline">Test Connection</button>
       </div>
     </section>
+
+    <div id="fridgeView" class="view-panel">
 
     <!-- Arduino Hardware Live Status Card -->
     <section class="card arduino-card">
@@ -153,6 +173,43 @@
         <p class="empty-sub">Add fresh items above to track expiration dates and send live alerts to your Arduino.</p>
       </div>
     </section>
+    </div>
+
+    <!-- SuperCook Recipe Finder View -->
+    <div id="recipesView" class="view-panel hidden">
+      <section class="card">
+        <div class="card-header">
+          <span class="card-title">🧺 Ingredients You Have</span>
+          <button type="button" id="cookExpiringBtn" class="btn-sm btn-ghost">🔥 Use Expiring Soon</button>
+        </div>
+        <p class="settings-hint">Click any ingredient from your fridge below (sorted closest to expiry) to find matching SuperCook recipes.</p>
+        <div id="pantryChips" class="chips-container"></div>
+        <div class="recipe-search-row">
+          <input id="recipeQuery" placeholder="Search recipes or ingredient (e.g. steak, pasta, chicken)..." class="search-input">
+          <button type="button" id="recipeSearchBtn" class="btn-primary recipe-search-btn">Search</button>
+        </div>
+      </section>
+
+      <!-- Selected Recipe Detail Card -->
+      <section id="recipeDetailCard" class="card recipe-detail-card hidden"></section>
+
+      <!-- Recipe Results -->
+      <section class="card">
+        <div class="inventory-header">
+          <div class="inventory-title-group">
+            <h2>Recipe Ideas</h2>
+            <span class="item-count-badge" id="recipeCount">0</span>
+          </div>
+          <span id="recipeQueryLabel" class="sub">Powered by Forkify</span>
+        </div>
+        <div id="recipeResults" class="recipe-grid"></div>
+        <div id="recipeEmptyState" class="empty-state">
+          <div class="empty-icon">🍳</div>
+          <p class="empty-title">Find recipes from your fridge</p>
+          <p class="empty-sub">Tap an ingredient chip above or search any dish to see what you can cook right now.</p>
+        </div>
+      </section>
+    </div>
 
     <!-- Footer -->
     <footer class="app-footer">
