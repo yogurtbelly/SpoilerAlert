@@ -72,6 +72,11 @@
     "category": "Pantry"
   },
   {
+    "name": "Rice",
+    "expiry": "2026-12-20",
+    "category": "Pantry"
+  },
+  {
     "name": "Fries",
     "expiry": "2027-02-18",
     "qty": 5,
