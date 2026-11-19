@@ -580,10 +580,61 @@ $('name').addEventListener('input', e => {
 // SuperCook / Forkify v2 Recipe Finder
 // ==========================================
 const FORKIFY_API = 'https://forkify-api.jonas.io/api/v2/recipes';
+const recipeDetailCache = new Map();
 
 function normalizeImageUrl(url) {
   if (!url) return '';
   return url.replace('http://forkify-api.herokuapp.com', 'https://forkify-api.herokuapp.com');
+}
+
+function isStapleIngredient(ingredientDesc) {
+  const desc = (ingredientDesc || '').toLowerCase();
+  if (/\bsalt\b/.test(desc)) return true;
+  if (/\bpepper\b/.test(desc) && !/\b(bell|red|green|yellow|orange|chili|chile|jalapeno|poblano|habanero|serrano|banana)\s+pepper/.test(desc)) {
+    return true;
+  }
+  return false;
+}
+
+function findMatchingFridgeItems(ingredientDesc) {
+  const desc = (ingredientDesc || '').toLowerCase();
+  return items.filter(it => {
+    const name = it.name.trim().toLowerCase();
+    if (!name) return false;
+    const words = name.split(/\s+/).filter(w => w.length >= 3);
+    return desc.includes(name) || words.some(w => desc.includes(w));
+  });
+}
+
+function scoreRecipe(rec) {
+  const ings = rec?.ingredients || [];
+  const totalCount = ings.length;
+  if (totalCount === 0) return { haveCount: 0, totalCount: 0, matchPct: 0, missingCount: 0 };
+
+  let haveCount = 0;
+  ings.forEach(ing => {
+    if (findMatchingFridgeItems(ing.description).length > 0 || isStapleIngredient(ing.description)) {
+      haveCount++;
+    }
+  });
+
+  return {
+    haveCount,
+    totalCount,
+    matchPct: Math.round((haveCount / totalCount) * 100),
+    missingCount: totalCount - haveCount
+  };
+}
+
+async function fetchRecipeDetail(recipeId) {
+  if (recipeDetailCache.has(recipeId)) return recipeDetailCache.get(recipeId);
+  const r = await fetch(`${FORKIFY_API}/${encodeURIComponent(recipeId)}`);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const data = await r.json();
+  const rec = data?.data?.recipe;
+  if (!rec) throw new Error('Recipe not found');
+  recipeDetailCache.set(recipeId, rec);
+  return rec;
 }
 
 function renderPantryChips() {
@@ -628,7 +679,7 @@ async function searchRecipes(queryOverride = null) {
   }
 
   $('recipeDetailCard').classList.add('hidden');
-  $('recipeQueryLabel').textContent = `Searching "${query}"...`;
+  $('recipeQueryLabel').textContent = `Matching "${query}" with your fridge...`;
   $('recipeEmptyState').classList.add('hidden');
   $('recipeResults').innerHTML = '';
 
@@ -638,21 +689,54 @@ async function searchRecipes(queryOverride = null) {
     const data = await r.json();
     lastRecipes = data?.data?.recipes || [];
     $('recipeCount').textContent = lastRecipes.length;
-    $('recipeQueryLabel').textContent = `Results for "${query}"`;
 
     if (lastRecipes.length === 0) {
+      $('recipeQueryLabel').textContent = `Results for "${query}"`;
       $('recipeEmptyState').classList.remove('hidden');
       $('recipeEmptyState').querySelector('.empty-title').textContent = `No recipes found for "${query}"`;
       $('recipeEmptyState').querySelector('.empty-sub').textContent = 'Try a simpler ingredient name (e.g. "steak", "milk", "egg", "tomato").';
       return;
     }
 
-    lastRecipes.slice(0, 12).forEach(rec => {
+    // Fetch details for top 12 recipes in parallel to rank by ingredient completeness (including salt & pepper)
+    const topSlice = lastRecipes.slice(0, 12);
+    const settled = await Promise.allSettled(topSlice.map(rec => fetchRecipeDetail(rec.id)));
+
+    const ranked = topSlice.map((rec, idx) => {
+      const fullRec = settled[idx].status === 'fulfilled' ? settled[idx].value : null;
+      const stats = fullRec ? scoreRecipe(fullRec) : { haveCount: 0, totalCount: 0, matchPct: -1, missingCount: 99 };
+      return { rec, fullRec, stats };
+    }).sort((a, b) => {
+      if (b.stats.matchPct !== a.stats.matchPct) return b.stats.matchPct - a.stats.matchPct;
+      if (b.stats.haveCount !== a.stats.haveCount) return b.stats.haveCount - a.stats.haveCount;
+      return a.stats.missingCount - b.stats.missingCount;
+    });
+
+    $('recipeQueryLabel').textContent = `Best matches for "${query}" (incl. salt & pepper)`;
+
+    ranked.forEach(({ rec, stats }) => {
       const card = document.createElement('div');
       card.className = 'recipe-card';
+
+      let matchHtml = '';
+      if (stats.totalCount > 0) {
+        const tier = stats.matchPct >= 70 ? 'match-high' : (stats.matchPct >= 40 ? 'match-mid' : 'match-low');
+        const label = stats.matchPct === 100
+          ? `100% Ready (${stats.haveCount}/${stats.totalCount})`
+          : `${stats.matchPct}% Ready (${stats.haveCount}/${stats.totalCount})`;
+        const missText = stats.missingCount === 0
+          ? 'All ingredients ready!'
+          : `Missing ${stats.missingCount} ingredient${stats.missingCount === 1 ? '' : 's'}`;
+        matchHtml = `
+          <span class="recipe-match-pill ${tier}">${label}</span>
+          <div class="recipe-missing">${missText}</div>
+        `;
+      }
+
       card.innerHTML = `
         <img class="recipe-thumb" src="${escapeHtml(normalizeImageUrl(rec.image_url))}" alt="${escapeHtml(rec.title)}" loading="lazy">
         <div class="recipe-card-body">
+          ${matchHtml}
           <div class="recipe-title">${escapeHtml(rec.title)}</div>
           <div class="recipe-publisher">${escapeHtml(rec.publisher)}</div>
         </div>
@@ -666,16 +750,6 @@ async function searchRecipes(queryOverride = null) {
   }
 }
 
-function findMatchingFridgeItems(ingredientDesc) {
-  const desc = (ingredientDesc || '').toLowerCase();
-  return items.filter(it => {
-    const name = it.name.trim().toLowerCase();
-    if (!name) return false;
-    const words = name.split(/\s+/).filter(w => w.length >= 3);
-    return desc.includes(name) || words.some(w => desc.includes(w));
-  });
-}
-
 async function openRecipeDetail(recipeId) {
   const detailCard = $('recipeDetailCard');
   detailCard.classList.remove('hidden');
@@ -683,22 +757,24 @@ async function openRecipeDetail(recipeId) {
   detailCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   try {
-    const r = await fetch(`${FORKIFY_API}/${encodeURIComponent(recipeId)}`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
-    const rec = data?.data?.recipe;
-    if (!rec) throw new Error('Recipe not found');
+    const rec = await fetchRecipeDetail(recipeId);
+    const stats = scoreRecipe(rec);
 
     const matchedFridgeNames = new Set();
     const ingHtml = (rec.ingredients || []).map(ing => {
       const label = [ing.quantity, ing.unit, ing.description].filter(Boolean).join(' ');
       const matches = findMatchingFridgeItems(ing.description);
-      const hasIt = matches.length > 0;
+      const inFridge = matches.length > 0;
+      const isStaple = !inFridge && isStapleIngredient(ing.description);
+      const hasIt = inFridge || isStaple;
       matches.forEach(m => matchedFridgeNames.add(m.name));
+
+      const badgeClass = inFridge ? 'have' : (isStaple ? 'staple' : 'miss');
+      const badgeText  = inFridge ? '✓ In Fridge' : (isStaple ? '✓ Salt & Pepper' : 'Need');
       return `
         <li class="recipe-ing-item ${hasIt ? 'have' : ''}">
           <span>${escapeHtml(label)}</span>
-          <span class="ing-badge ${hasIt ? 'have' : 'miss'}">${hasIt ? '✓ In Fridge' : 'Need'}</span>
+          <span class="ing-badge ${badgeClass}">${badgeText}</span>
         </li>
       `;
     }).join('');
@@ -716,13 +792,13 @@ async function openRecipeDetail(recipeId) {
           <div class="recipe-meta">
             <span>⏱️ ${rec.cooking_time || 30} min</span>
             <span>🍽️ ${rec.servings || 4} servings</span>
-            <span>✅ ${matchedCount} fridge match${matchedCount === 1 ? '' : 'es'}</span>
+            <span>✅ ${stats.haveCount}/${stats.totalCount} (${stats.matchPct}%)</span>
           </div>
         </div>
       </div>
       <ul class="recipe-ing-list">${ingHtml}</ul>
       <div class="recipe-detail-actions">
-        ${matchedCount > 0 ? `<button type="button" id="useMatchedBtn" class="btn-primary">🍳 Cooked! Remove ${matchedCount} Used Item${matchedCount === 1 ? '' : 's'}</button>` : '<span class="sub">No matching fridge items to deduct</span>'}
+        ${matchedCount > 0 ? `<button type="button" id="useMatchedBtn" class="btn-primary">🍳 Cooked! Remove ${matchedCount} Used Item${matchedCount === 1 ? '' : 's'}</button>` : '<span class="sub">No fridge items to deduct (staples kept)</span>'}
         <a href="${escapeHtml(rec.source_url)}" target="_blank" rel="noopener noreferrer" class="btn-outline" style="text-decoration:none;padding:8px 12px;font-size:0.82rem;">Full Directions ↗</a>
       </div>
     `;

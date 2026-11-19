@@ -1042,8 +1042,46 @@ button {
   color: #ffffff;
 }
 
+.ing-badge.staple {
+  background: #0d9488;
+  color: #ffffff;
+}
+
 .ing-badge.miss {
   background: #e2e8f0;
+  color: var(--text-muted);
+}
+
+.recipe-match-pill {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: 2px;
+}
+
+.recipe-match-pill.match-high {
+  background: var(--safe-light);
+  color: var(--primary-dark);
+  border: 1px solid #a7f3d0;
+}
+
+.recipe-match-pill.match-mid {
+  background: var(--warning-light);
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.recipe-match-pill.match-low {
+  background: #f1f5f9;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.recipe-missing {
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
