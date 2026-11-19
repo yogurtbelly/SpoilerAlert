@@ -20,10 +20,6 @@
     "category": "Bakery"
   },
   {
-    "name": "Tomatoes",
-    "expiry": "2026-12-10"
-  },
-  {
     "name": "Tomato",
     "expiry": "2026-12-20",
     "category": "Pantry"
