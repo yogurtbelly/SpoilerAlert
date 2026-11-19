@@ -14,5 +14,9 @@
   {
     "name": "Tomato",
     "expiry": "2026-12-19"
+  },
+  {
+    "name": "pasta",
+    "expiry": "2026-12-19"
   }
 ]
