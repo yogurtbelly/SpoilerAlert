@@ -40,6 +40,11 @@
     "category": "Fruit"
   },
   {
+    "name": "Shallots",
+    "expiry": "2026-11-27",
+    "category": "Fruit"
+  },
+  {
     "name": "eggs",
     "expiry": "2026-12-04",
     "qty": 15,
