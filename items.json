@@ -20,6 +20,12 @@
     "category": "Bakery"
   },
   {
+    "name": "eggs",
+    "expiry": "2026-12-04",
+    "qty": 15,
+    "category": "Eggs"
+  },
+  {
     "name": "Tomato",
     "expiry": "2026-12-20",
     "category": "Pantry"
