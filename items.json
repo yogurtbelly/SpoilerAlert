@@ -1,9 +1,5 @@
 [
   {
-    "name": "Salt Bread",
-    "expiry": "2026-11-15"
-  },
-  {
     "name": "Yogurt",
     "expiry": "2026-11-21",
     "category": "Dairy"
