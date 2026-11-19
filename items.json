@@ -8,6 +8,11 @@
     "expiry": "2026-11-17"
   },
   {
+    "name": "Yogurt",
+    "expiry": "2026-11-21",
+    "category": "Dairy"
+  },
+  {
     "name": "MeatLoaf",
     "expiry": "2026-11-22",
     "category": "Meat"
