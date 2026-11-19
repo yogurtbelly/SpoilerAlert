@@ -25,6 +25,11 @@
     "category": "Eggs"
   },
   {
+    "name": "eggs",
+    "expiry": "2026-12-04",
+    "category": "Eggs"
+  },
+  {
     "name": "Tomatoes",
     "expiry": "2026-12-10"
   },
