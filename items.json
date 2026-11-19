@@ -8,6 +8,11 @@
     "expiry": "2026-11-17"
   },
   {
+    "name": "MeatLoaf",
+    "expiry": "2026-11-22",
+    "category": "Meat"
+  },
+  {
     "name": "MIlk",
     "expiry": "2026-11-23",
     "category": "Dairy"
